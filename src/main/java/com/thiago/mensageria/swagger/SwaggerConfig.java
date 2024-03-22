@@ -18,6 +18,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
+	/**
+	 * Classe de contato que é obrigatorio do swagger
+	 * @return
+	 */
 	private Contact contato() {
 		return new Contact(
 				"teste",
@@ -36,6 +40,10 @@ public class SwaggerConfig {
 		return builder;
 	}
 	
+	/**
+	 * Classe que define qual o pacote com as apis a serem mapeadas.
+	 * @return
+	 */
 	@Bean
 	public Docket Api() {
 		Docket doc = new Docket(DocumentationType.SWAGGER_2);
