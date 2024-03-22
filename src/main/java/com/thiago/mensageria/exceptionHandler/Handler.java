@@ -46,7 +46,7 @@ public class Handler extends ResponseEntityExceptionHandler{
     }
     @ExceptionHandler({MensagemNotSendException.class})
     private ResponseEntity<Object> handleBusinessException(MensagemNotSendException e, WebRequest request) {
-        ResponseError error = response(e.getMessage(),HttpStatus.CONFLICT);
-        return handleExceptionInternal(e, error, headers(), HttpStatus.CONFLICT, request);
+        ResponseError error = response(e.getMessage(),HttpStatus.BAD_REQUEST);
+        return handleExceptionInternal(e, error, headers(), HttpStatus.BAD_REQUEST, request);
     }
 }
