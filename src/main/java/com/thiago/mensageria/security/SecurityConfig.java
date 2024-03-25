@@ -1,8 +1,13 @@
 package com.thiago.mensageria.security;
 
+import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -37,7 +42,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig {
 
-	// aqui criamos os roles que podem acessar nossa aplicação, na memoria.
+	// aqui criamos os roles que podem acessar nossa aplicação, na memoria, posteriormente será trocada para memoria no banco de dados.
 	@Bean
 	public UserDetailsService userDetailsService(BCryptPasswordEncoder bCryptPasswordEncoder) {
 		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
@@ -58,16 +63,29 @@ public class SecurityConfig {
 		http.csrf(Customizer.withDefaults())
 		.authorizeHttpRequests(
 				authorize -> authorize
-				.requestMatchers("/**").hasAnyRole("admin", "user")
+				.requestMatchers(HttpMethod.POST, "/login").permitAll()
+				.requestMatchers("/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated())
 		.httpBasic(Customizer.withDefaults())
-		.formLogin(Customizer.withDefaults());
+		.formLogin(formLogin -> formLogin
+                .loginPage("/login")
+                .permitAll());
 		return http.build();
 	}
 
+	/* criando o maneger de autenticação, que é a api que diz para o spring security como performar a authenticação
+	   o userDetailsService é o que foi contruido antes para criação dos roles com senhas e usuarios e aqui é onde dizemos ao spring
+	   que esses detalhes que devem ser utilizados. A só a nivel pra não ter duvidas, o ProviderManeger implementa o AuthenticationManeger
+	*/
 	@Bean
-	public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder,UserDetailsService userDetailService) throws Exception {
-		return http.getSharedObject(AuthenticationManagerBuilder.class).userDetailsService(userDetailService)
-				.passwordEncoder(bCryptPasswordEncoder).and().build();
+	public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
+			BCryptPasswordEncoder bCryptPasswordEncoder) {
+		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+		authenticationProvider.setUserDetailsService(userDetailsService);
+		authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder);
+		
+		ProviderManager provider =  new ProviderManager(authenticationProvider);
+		provider.setEraseCredentialsAfterAuthentication(false);
+		return provider;
 	}
 }
