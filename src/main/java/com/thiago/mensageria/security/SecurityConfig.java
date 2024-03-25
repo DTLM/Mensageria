@@ -1,5 +1,6 @@
 package com.thiago.mensageria.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +44,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
 	// aqui criamos os roles que podem acessar nossa aplicação, na memoria, posteriormente será trocada para memoria no banco de dados.
+	/*
 	@Bean
 	public UserDetailsService userDetailsService(BCryptPasswordEncoder bCryptPasswordEncoder) {
 		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
@@ -51,7 +53,16 @@ public class SecurityConfig {
 				.roles("USER", "ADMIN").build());
 		return manager;
 	}
-
+	*/
+	
+	@Autowired
+	private SecurityDatabaseService service;
+	
+	 @Autowired
+	    public void globalUserDetails(AuthenticationManagerBuilder auth, BCryptPasswordEncoder bCryptPasswordEncoder) throws Exception {
+	        auth.userDetailsService(service).passwordEncoder(bCryptPasswordEncoder);
+	    }
+	
 	/*
 	 * configura a ordem de verificação dos filtros, caso determinado filtro tenha
 	 * sido configurado no projeto. 1- CSRF FILTER 2- USER E PASSWORD AUTHENTICATION
