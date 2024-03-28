@@ -28,9 +28,7 @@ public class SecurityDatabaseService implements UserDetailsService{
 			throw new UsernameNotFoundException(username);
 		}
 		Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-        user.getRoles().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
-        });
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().getNome()));
         UserDetails userDetails = new User(user.getUsername(),
                 user.getPassword(),
                 authorities);

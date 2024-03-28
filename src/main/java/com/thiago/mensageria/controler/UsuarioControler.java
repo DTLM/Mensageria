@@ -19,7 +19,7 @@ public class UsuarioControler {
 	private IUsuarioService service;
 	
 	@PostMapping("/salvar")
-	public ResponseEntity enviar(@RequestBody Usuario usuario) {
+	public ResponseEntity salvar(@RequestBody Usuario usuario) {
 		if(usuario == null) {
 			return new ResponseEntity("Usuario impossivel,",HttpStatus.BAD_REQUEST);
 		}
