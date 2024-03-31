@@ -42,38 +42,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfig {
-
-	// aqui criamos os roles que podem acessar nossa aplicação, na memoria, posteriormente será trocada para memoria no banco de dados.
-	/*
-	@Bean
-	public UserDetailsService userDetailsService(BCryptPasswordEncoder bCryptPasswordEncoder) {
-		InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-		manager.createUser(User.withUsername("user").password(bCryptPasswordEncoder.encode("1234")).roles("USER").build());
-		manager.createUser(User.withUsername("admin").password(bCryptPasswordEncoder.encode("123"))
-				.roles("USER", "ADMIN").build());
-		return manager;
-	}
-	*/
-	
-	/* criando o maneger de autenticação, que é a api que diz para o spring security como performar a authenticação
-	   o userDetailsService é o que foi contruido antes para criação dos roles com senhas e usuarios e aqui é onde dizemos ao spring
-	   que esses detalhes que devem ser utilizados. A só a nivel pra não ter duvidas, o ProviderManeger implementa o AuthenticationManeger.
-	   
-	   Obs: no caso de usar o banco de dados, essa função é desnecessaria.
-	*/
-	/*
-	@Bean
-	public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
-			BCryptPasswordEncoder bCryptPasswordEncoder) {
-		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-		authenticationProvider.setUserDetailsService(userDetailsService);
-		authenticationProvider.setPasswordEncoder(bCryptPasswordEncoder);
-		
-		ProviderManager provider =  new ProviderManager(authenticationProvider);
-		provider.setEraseCredentialsAfterAuthentication(false);
-		return provider;
-	}
-	*/
 	
 	@Autowired
 	private SecurityDatabaseService service;
@@ -95,6 +63,7 @@ public class SecurityConfig {
 		.authorizeHttpRequests(
 				authorize -> authorize
 				.requestMatchers(HttpMethod.POST, "/login").permitAll()
+				.requestMatchers("/admin/*").hasAnyRole("ADMIN")
 				.requestMatchers("/**").hasAnyRole("USER", "ADMIN")
 				.anyRequest().authenticated())
 		.httpBasic(Customizer.withDefaults())
